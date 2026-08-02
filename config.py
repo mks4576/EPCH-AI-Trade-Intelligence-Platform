@@ -1,92 +1,131 @@
 """
-Configuration File
+Configuration
 EPCH AI Trade Intelligence Platform
 Version 2.0
 """
 
-# --------------------------------------------------
-# Countries
-# --------------------------------------------------
+# ==========================================================
+# Application
+# ==========================================================
+
+APP_NAME = "EPCH AI Trade Intelligence Platform"
+APP_VERSION = "2.0.0"
+
+# ==========================================================
+# Google Gemini
+# ==========================================================
+
+# Stable model for Buyer Discovery
+AI_MODEL = "gemini-2.0-flash"
+
+# ==========================================================
+# Buyer Discovery Options
+# ==========================================================
 
 COUNTRIES = [
     "United States",
-    "Germany",
     "United Kingdom",
+    "Germany",
     "France",
     "Italy",
-    "Netherlands",
     "Spain",
+    "Netherlands",
+    "Belgium",
+    "Sweden",
+    "Denmark",
+    "Norway",
     "Canada",
     "Australia",
     "Japan",
+    "South Korea",
     "UAE",
     "Saudi Arabia",
-    "Singapore"
+    "Singapore",
+    "Malaysia",
+    "South Africa"
 ]
-
-# --------------------------------------------------
-# Product Categories
-# --------------------------------------------------
 
 PRODUCT_CATEGORIES = [
-    "Wooden Handicrafts",
     "Home Decor",
     "Furniture",
-    "Metal Handicrafts",
-    "Glassware",
-    "Ceramics",
     "Textiles",
+    "Home Furnishings",
+    "Kitchenware",
+    "Tableware",
+    "Lighting",
+    "Garden Decor",
     "Handmade Paper",
+    "Gift Items",
+    "Fashion Accessories",
     "Jewellery",
     "Leather Products",
-    "Natural Fiber Products",
+    "Wooden Handicrafts",
+    "Metal Handicrafts",
+    "Stone Handicrafts",
+    "Glassware",
     "Christmas Decorations",
-    "Fashion Accessories",
-    "Gift Articles"
+    "Eco-friendly Products",
+    "Sustainable Products"
 ]
-
-# --------------------------------------------------
-# Buyer Types
-# --------------------------------------------------
 
 BUYER_TYPES = [
-    "Importers",
-    "Wholesalers",
-    "Retailers",
-    "Distributors",
-    "Buying Houses",
-    "E-commerce Companies"
+    "Importer",
+    "Wholesaler",
+    "Distributor",
+    "Retailer",
+    "E-commerce",
+    "Department Store",
+    "Chain Store",
+    "Buying House"
 ]
-
-# --------------------------------------------------
-# Number of Buyers
-# --------------------------------------------------
 
 BUYER_COUNTS = [
     5,
     10,
-    20,
-    30,
-    50
+    15,
+    20
 ]
-
-# --------------------------------------------------
-# Export Formats
-# --------------------------------------------------
 
 EXPORT_FORMATS = [
     "CSV",
     "Excel"
 ]
 
-# --------------------------------------------------
-# AI Model
-# --------------------------------------------------
+# ==========================================================
+# Buyer Rating Scale
+# ==========================================================
 
-AI_MODEL = "gemini-flash-latest"
+MAX_CONFIDENCE = 100
+MAX_RATING = 5
 
-# --------------------------------------------------
-# Platform Version
-# --------------------------------------------------
+# ==========================================================
+# Dashboard Theme
+# ==========================================================
 
-APP_VERSION = "2.0"
+PRIMARY_COLOR = "#0F62FE"
+SUCCESS_COLOR = "#24A148"
+WARNING_COLOR = "#F1C21B"
+DANGER_COLOR = "#DA1E28"
+
+# ==========================================================
+# Default Values
+# ==========================================================
+
+DEFAULT_COUNTRY = "United States"
+DEFAULT_CATEGORY = "Home Decor"
+DEFAULT_BUYERS = 10
+DEFAULT_BUYER_TYPE = "Importer"
+
+# ==========================================================
+# Retry Configuration
+# ==========================================================
+
+MAX_RETRIES = 3
+RETRY_DELAY = 2
+
+# ==========================================================
+# Supported Export Extensions
+# ==========================================================
+
+CSV_FILENAME = "buyers.csv"
+EXCEL_FILENAME = "buyers.xlsx"

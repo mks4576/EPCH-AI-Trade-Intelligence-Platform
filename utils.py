@@ -1,137 +1,234 @@
 """
 Utility Functions
 EPCH AI Trade Intelligence Platform
+Version 2.0
 """
 
 import io
 import pandas as pd
 
-
-# --------------------------------------------------------
+# ==========================================================
 # Dashboard Metrics
-# --------------------------------------------------------
+# ==========================================================
 
-def average_confidence(buyers):
+def average_confidence(df: pd.DataFrame) -> float:
     """
     Calculate average confidence score.
     """
 
-    if not buyers:
-        return 0
+    if df.empty:
+        return 0.0
 
-    scores = []
-
-    for buyer in buyers:
-
-        confidence = buyer.get("confidence", 0)
-
-        if isinstance(confidence, (int, float)):
-            scores.append(confidence)
-
-    if not scores:
-        return 0
-
-    return round(sum(scores) / len(scores), 1)
+    return round(df["confidence"].mean(), 1)
 
 
-# --------------------------------------------------------
-# Search Buyers
-# --------------------------------------------------------
-
-def search_buyers(buyers, keyword):
+def average_potential(df: pd.DataFrame) -> float:
     """
-    Search buyers by company, country,
-    buyer type or products.
+    Calculate average buyer potential.
     """
 
-    if not keyword:
-        return buyers
+    if df.empty:
+        return 0.0
+
+    return round(df["buyer_potential"].mean(), 1)
+
+
+def average_market_fit(df: pd.DataFrame) -> float:
+    """
+    Calculate average market fit.
+    """
+
+    if df.empty:
+        return 0.0
+
+    return round(df["market_fit"].mean(), 1)
+
+
+# ==========================================================
+# Search & Filter
+# ==========================================================
+
+def search_buyers(df: pd.DataFrame, keyword: str) -> pd.DataFrame:
+    """
+    Search buyers across multiple columns.
+    """
+
+    if df.empty or not keyword:
+        return df
 
     keyword = keyword.lower()
 
-    filtered = []
+    mask = (
+        df["company_name"].astype(str).str.lower().str.contains(keyword)
+        | df["country"].astype(str).str.lower().str.contains(keyword)
+        | df["buyer_type"].astype(str).str.lower().str.contains(keyword)
+        | df["products"].astype(str).str.lower().str.contains(keyword)
+    )
 
-    for buyer in buyers:
-
-        text = " ".join([
-            buyer.get("company_name", ""),
-            buyer.get("country", ""),
-            buyer.get("buyer_type", ""),
-            buyer.get("products", "")
-        ]).lower()
-
-        if keyword in text:
-            filtered.append(buyer)
-
-    return filtered
+    return df[mask]
 
 
-# --------------------------------------------------------
-# DataFrame
-# --------------------------------------------------------
+def filter_country(df: pd.DataFrame, country: str) -> pd.DataFrame:
+    """
+    Filter by country.
+    """
 
-def buyers_dataframe(buyers):
+    if df.empty or country == "All":
+        return df
 
-    return pd.DataFrame(buyers)
+    return df[df["country"] == country]
 
 
-# --------------------------------------------------------
-# CSV Export
-# --------------------------------------------------------
+def filter_buyer_type(df: pd.DataFrame, buyer_type: str) -> pd.DataFrame:
+    """
+    Filter by buyer type.
+    """
 
-def dataframe_to_csv(df):
+    if df.empty or buyer_type == "All":
+        return df
+
+    return df[df["buyer_type"] == buyer_type]
+
+
+# ==========================================================
+# Sorting
+# ==========================================================
+
+def sort_by_confidence(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Highest confidence first.
+    """
+
+    if df.empty:
+        return df
+
+    return df.sort_values(
+        by="confidence",
+        ascending=False,
+        ignore_index=True,
+    )
+
+
+def sort_by_market_fit(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Highest market fit first.
+    """
+
+    if df.empty:
+        return df
+
+    return df.sort_values(
+        by="market_fit",
+        ascending=False,
+        ignore_index=True,
+    )
+
+
+def sort_by_potential(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Highest buyer potential first.
+    """
+
+    if df.empty:
+        return df
+
+    return df.sort_values(
+        by="buyer_potential",
+        ascending=False,
+        ignore_index=True,
+    )
+
+
+# ==========================================================
+# Export Functions
+# ==========================================================
+
+def dataframe_to_csv(df: pd.DataFrame) -> bytes:
+    """
+    Convert DataFrame to CSV.
+    """
 
     return df.to_csv(index=False).encode("utf-8")
 
 
-# --------------------------------------------------------
-# Excel Export
-# --------------------------------------------------------
-
-def dataframe_to_excel(df):
+def dataframe_to_excel(df: pd.DataFrame) -> bytes:
+    """
+    Convert DataFrame to Excel.
+    """
 
     output = io.BytesIO()
 
     with pd.ExcelWriter(
         output,
-        engine="openpyxl"
+        engine="openpyxl",
     ) as writer:
 
         df.to_excel(
             writer,
+            sheet_name="Buyers",
             index=False,
-            sheet_name="Buyers"
         )
 
     return output.getvalue()
-# --------------------------------------------------------
-# JSON Response to DataFrame
-# --------------------------------------------------------
-
-import json
 
 
-def json_to_dataframe(response_text):
+# ==========================================================
+# Data Formatting
+# ==========================================================
+
+def prepare_dataframe(buyers: list) -> pd.DataFrame:
     """
-    Converts Gemini JSON response into a Pandas DataFrame.
+    Convert buyer list to DataFrame and
+    add Serial Number column.
     """
 
-    try:
+    df = pd.DataFrame(buyers)
 
-        # Remove markdown code fences if Gemini returns them
-        cleaned = (
-            response_text
-            .replace("```json", "")
-            .replace("```", "")
-            .strip()
-        )
+    if df.empty:
+        return df
 
-        buyers = json.loads(cleaned)
+    df.insert(
+        0,
+        "S.No.",
+        range(1, len(df) + 1),
+    )
 
-        if isinstance(buyers, dict):
-            buyers = [buyers]
+    return df
 
-        return pd.DataFrame(buyers)
 
-    except Exception as e:
-        raise Exception(f"Unable to parse Gemini JSON:\n{e}")
+# ==========================================================
+# Risk Summary
+# ==========================================================
+
+def risk_summary(df: pd.DataFrame) -> dict:
+    """
+    Count buyers by risk level.
+    """
+
+    if df.empty:
+        return {}
+
+    return (
+        df["risk_level"]
+        .value_counts()
+        .to_dict()
+    )
+
+
+# ==========================================================
+# Business Size Summary
+# ==========================================================
+
+def business_size_summary(df: pd.DataFrame) -> dict:
+    """
+    Count buyers by business size.
+    """
+
+    if df.empty:
+        return {}
+
+    return (
+        df["business_size"]
+        .value_counts()
+        .to_dict()
+    )

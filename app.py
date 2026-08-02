@@ -1,13 +1,21 @@
 """
 EPCH AI Trade Intelligence Platform
 Version 2.0
+Executive AI Dashboard
 """
 
 import pandas as pd
 import streamlit as st
 
 from buyer_engine import discover_buyers
-from utils import dataframe_to_csv, dataframe_to_excel
+
+from utils import (
+    average_confidence,
+    average_market_fit,
+    average_potential,
+    dataframe_to_csv,
+    dataframe_to_excel,
+)
 
 from config import (
     COUNTRIES,
@@ -42,23 +50,24 @@ with st.sidebar:
     st.subheader("Project Information")
 
     st.write(f"**Version:** {APP_VERSION}")
-    st.write(f"**Model:** {AI_MODEL}")
-    st.write("**Framework:** Streamlit")
+    st.write(f"**AI Model:** {AI_MODEL}")
 
     st.markdown("---")
 
-    st.subheader("Current Features")
-
-    st.success("Buyer Discovery")
-    st.success("Google Gemini")
-    st.success("CSV Export")
-    st.success("Excel Export")
+    st.success("✅ Buyer Discovery")
+    st.success("✅ AI Buyer Intelligence")
+    st.success("✅ CSV Export")
+    st.success("✅ Excel Export")
 
     st.markdown("---")
 
     st.info(
-        "AI-powered Trade Intelligence Platform\n\n"
-        "Built using Python + Streamlit + Google Gemini."
+        """
+Enterprise AI Platform
+
+Designed for Export Promotion Councils,
+Exporters and International Trade Teams.
+"""
     )
 
 # --------------------------------------------------
@@ -74,125 +83,214 @@ st.caption(
 st.markdown("---")
 
 # --------------------------------------------------
-# Search Form
+# Search Panel
 # --------------------------------------------------
 
-col1, col2 = st.columns(2)
+left, right = st.columns(2)
 
-with col1:
+with left:
 
     country = st.selectbox(
         "🌎 Export Destination",
-        COUNTRIES
+        COUNTRIES,
     )
 
     category = st.selectbox(
         "📦 Product Category",
-        PRODUCT_CATEGORIES
+        PRODUCT_CATEGORIES,
     )
 
     keywords = st.text_input(
         "🔍 Keywords",
-        placeholder="Example: Sustainable, Handmade, Luxury"
+        placeholder="Luxury, Sustainable, Handmade...",
     )
 
-with col2:
+with right:
 
     buyer_type = st.selectbox(
         "🏢 Buyer Type",
-        BUYER_TYPES
+        BUYER_TYPES,
     )
 
     buyers = st.selectbox(
         "👥 Number of Buyers",
-        BUYER_COUNTS
+        BUYER_COUNTS,
     )
 
     export_format = st.selectbox(
         "📥 Export Format",
-        EXPORT_FORMATS
+        EXPORT_FORMATS,
     )
 
 st.markdown("")
 
 search = st.button(
     "🚀 Discover Buyers",
-    use_container_width=True
+    width="stretch",
 )
 
 # --------------------------------------------------
-# Search
+# Buyer Discovery
 # --------------------------------------------------
 
 if search:
 
-    with st.spinner("Searching international buyers..."):
+    with st.spinner("🔍 AI is discovering international buyers..."):
 
         result = discover_buyers(
             country=country,
             category=category,
             keywords=f"{buyer_type}, {keywords}",
-            buyers=buyers
+            buyers=buyers,
         )
 
-    # -------------------------------
-    # Error Handling
-    # -------------------------------
+    if isinstance(result, dict):
 
-    if isinstance(result, dict) and "error" in result:
-
-        st.error(result["error"])
+        st.error(result.get("error", "Unknown error"))
 
         if "raw_response" in result:
 
             st.text_area(
-                "Gemini Response",
+                "Gemini Raw Response",
                 result["raw_response"],
-                height=400
+                height=300,
             )
 
     else:
 
-        df = pd.DataFrame(result)
+        from utils import prepare_dataframe
 
-        st.success(f"{len(df)} buyers found.")
+        df = prepare_dataframe(result)
 
+        st.success(f"✅ {len(df)} Buyers Found")
+
+        # --------------------------------------------------
+        # Executive Dashboard
+        # --------------------------------------------------
+
+        st.subheader("📊 Executive Dashboard")
+
+        col1, col2, col3, col4 = st.columns(4)
+
+        col1.metric(
+            "Total Buyers",
+            len(df),
+        )
+
+        col2.metric(
+            "Avg Confidence",
+            f"{average_confidence(df)}%",
+        )
+
+        col3.metric(
+            "Buyer Potential",
+            f"{average_potential(df)}/5",
+        )
+
+        col4.metric(
+            "Market Fit",
+            f"{average_market_fit(df)}/5",
+        )
+
+        st.markdown("---")
+
+        # --------------------------------------------------
+        # Buyer Intelligence
+        # --------------------------------------------------
+
+        st.subheader("🏢 Buyer Intelligence")
+
+        for buyer in result:
+
+            with st.expander(
+                f"🏢 {buyer['company_name']} ({buyer['country']})"
+            ):
+
+                left_col, right_col = st.columns(2)
+
+                with left_col:
+
+                    st.write(f"**🌐 Website:** {buyer['website']}")
+                    st.write(f"**🏢 Buyer Type:** {buyer['buyer_type']}")
+                    st.write(f"**📦 Products:** {buyer['products']}")
+                    st.write(f"**📈 Confidence:** {buyer['confidence']}%")
+                    st.write(
+                        f"**⭐ Buyer Potential:** {'⭐' * buyer['buyer_potential']}"
+                    )
+                    st.write(
+                        f"**🎯 Market Fit:** {'⭐' * buyer['market_fit']}"
+                    )
+
+                with right_col:
+
+                    st.write(f"**🏭 Business Size:** {buyer['business_size']}")
+                    st.write(f"**⚠️ Risk Level:** {buyer['risk_level']}")
+                    st.write(
+                        f"**👤 Suggested Contact:** {buyer['suggested_contact']}"
+                    )
+
+                    st.write("**📬 Recommended Approach**")
+
+                    st.info(
+                        buyer["recommended_approach"]
+                    )
+
+                st.markdown("### 🤖 AI Summary")
+
+                st.success(
+                    buyer["ai_summary"]
+                )
+
+                st.markdown("### 💡 Why this Buyer?")
+
+                st.write(
+                    buyer["reason"]
+                )
+
+        st.markdown("---")
+
+        # --------------------------------------------------
+        # Buyer Data
+        # --------------------------------------------------
+
+        st.subheader("📄 Buyer Data")
+
+        # Hide the default DataFrame index because we have our own S.No. column
         st.dataframe(
             df,
-            use_container_width=True
+            hide_index=True,
+            width="stretch",
         )
 
         csv = dataframe_to_csv(df)
         excel = dataframe_to_excel(df)
 
-        col1, col2 = st.columns(2)
+        download1, download2 = st.columns(2)
 
-        with col1:
-
+        with download1:
             st.download_button(
-                "📄 Download CSV",
-                csv,
+                label="📄 Download CSV",
+                data=csv,
                 file_name="buyers.csv",
                 mime="text/csv",
-                use_container_width=True
+                width="stretch",
             )
 
-        with col2:
-
+        with download2:
             st.download_button(
-                "📊 Download Excel",
-                excel,
+                label="📊 Download Excel",
+                data=excel,
                 file_name="buyers.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True
+                width="stretch",
             )
 
-# --------------------------------------------------
+        # --------------------------------------------------
 # Footer
 # --------------------------------------------------
 
 st.markdown("---")
 
 st.caption(
-    "Developed by Manish Kumar | Version 2.0"
+    "Developed by MKS | EPCH AI Trade Intelligence Platform | Version 2.0"
 )

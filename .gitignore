@@ -1,0 +1,21 @@
+# Python virtual environment
+venv/
+
+# Environment variables
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# VS Code
+.vscode/
+
+# Streamlit cache
+.streamlit/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

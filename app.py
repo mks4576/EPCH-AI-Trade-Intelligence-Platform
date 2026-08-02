@@ -1,223 +1,198 @@
 """
-Export Promotion Council of India : AI Trade Intelligence Platform
-Main Streamlit App
+EPCH AI Trade Intelligence Platform
+Version 2.0
 """
 
+import pandas as pd
 import streamlit as st
 
 from buyer_engine import discover_buyers
+from utils import dataframe_to_csv, dataframe_to_excel
+
 from config import (
-    APP_NAME,
-    APP_ICON,
-    PAGE_LAYOUT,
-    CATEGORIES,
-    QUICK_COUNTRIES,
-    FAIR_INFO,
-    DEFAULT_BUYERS,
-    MAX_BUYERS
+    COUNTRIES,
+    PRODUCT_CATEGORIES,
+    BUYER_TYPES,
+    BUYER_COUNTS,
+    EXPORT_FORMATS,
+    APP_VERSION,
+    AI_MODEL,
 )
 
-from utils import (
-    average_confidence,
-    buyers_dataframe,
-    dataframe_to_csv,
-    dataframe_to_excel,
-    search_buyers
-)
-
-# --------------------------------------------------------
+# --------------------------------------------------
 # Page Configuration
-# --------------------------------------------------------
+# --------------------------------------------------
 
 st.set_page_config(
-    page_title=APP_NAME,
-    page_icon=APP_ICON,
-    layout=PAGE_LAYOUT
+    page_title="EPCH AI Trade Intelligence Platform",
+    page_icon="🌍",
+    layout="wide",
 )
 
-# --------------------------------------------------------
+# --------------------------------------------------
+# Sidebar
+# --------------------------------------------------
+
+with st.sidebar:
+
+    st.title("🌍 EPCH AI")
+
+    st.markdown("---")
+
+    st.subheader("Project Information")
+
+    st.write(f"**Version:** {APP_VERSION}")
+    st.write(f"**Model:** {AI_MODEL}")
+    st.write("**Framework:** Streamlit")
+
+    st.markdown("---")
+
+    st.subheader("Current Features")
+
+    st.success("Buyer Discovery")
+    st.success("Google Gemini")
+    st.success("CSV Export")
+    st.success("Excel Export")
+
+    st.markdown("---")
+
+    st.info(
+        "AI-powered Trade Intelligence Platform\n\n"
+        "Built using Python + Streamlit + Google Gemini."
+    )
+
+# --------------------------------------------------
 # Header
-# --------------------------------------------------------
+# --------------------------------------------------
 
 st.title("🌍 EPCH AI Trade Intelligence Platform")
-st.caption("AI Powered International Buyer Discovery")
 
-st.divider()
-
-# --------------------------------------------------------
-# Sidebar
-# --------------------------------------------------------
-
-st.sidebar.header("Buyer Search")
-
-country = st.sidebar.selectbox(
-    "Target Country",
-    QUICK_COUNTRIES
+st.caption(
+    "AI-powered Buyer Discovery & Trade Intelligence"
 )
 
-category = st.sidebar.selectbox(
-    "Product Category",
-    CATEGORIES
-)
+st.markdown("---")
 
-keywords = st.sidebar.text_input(
-    "Keywords",
-    placeholder="eco-friendly handmade products"
-)
+# --------------------------------------------------
+# Search Form
+# --------------------------------------------------
 
-buyers = st.sidebar.slider(
-    "Number of Buyers",
-    min_value=5,
-    max_value=MAX_BUYERS,
-    value=DEFAULT_BUYERS
-)
+col1, col2 = st.columns(2)
 
-search_button = st.sidebar.button(
+with col1:
+
+    country = st.selectbox(
+        "🌎 Export Destination",
+        COUNTRIES
+    )
+
+    category = st.selectbox(
+        "📦 Product Category",
+        PRODUCT_CATEGORIES
+    )
+
+    keywords = st.text_input(
+        "🔍 Keywords",
+        placeholder="Example: Sustainable, Handmade, Luxury"
+    )
+
+with col2:
+
+    buyer_type = st.selectbox(
+        "🏢 Buyer Type",
+        BUYER_TYPES
+    )
+
+    buyers = st.selectbox(
+        "👥 Number of Buyers",
+        BUYER_COUNTS
+    )
+
+    export_format = st.selectbox(
+        "📥 Export Format",
+        EXPORT_FORMATS
+    )
+
+st.markdown("")
+
+search = st.button(
     "🚀 Discover Buyers",
     use_container_width=True
 )
 
-# --------------------------------------------------------
-# Fair Information
-# --------------------------------------------------------
+# --------------------------------------------------
+# Search
+# --------------------------------------------------
 
-with st.expander("IHGF Fair Information"):
+if search:
 
-    st.write(f"**Fair:** {FAIR_INFO['name']}")
-    st.write(f"**Organizer:** {FAIR_INFO['organizer']}")
-    st.write(f"**Venue:** {FAIR_INFO['venue']}")
-    st.write(f"**Website:** {FAIR_INFO['website']}")
-
-# --------------------------------------------------------
-# Run AI
-# --------------------------------------------------------
-
-if search_button:
-
-    with st.spinner("Searching buyers using Gemini AI..."):
+    with st.spinner("Searching international buyers..."):
 
         result = discover_buyers(
-            country,
-            category,
-            keywords,
-            buyers
+            country=country,
+            category=category,
+            keywords=f"{buyer_type}, {keywords}",
+            buyers=buyers
         )
 
-    if isinstance(result, dict):
+    # -------------------------------
+    # Error Handling
+    # -------------------------------
 
-        st.error(result.get("error", "Unknown error"))
+    if isinstance(result, dict) and "error" in result:
+
+        st.error(result["error"])
 
         if "raw_response" in result:
 
-            with st.expander("Raw Response"):
-
-                st.code(result["raw_response"])
+            st.text_area(
+                "Gemini Response",
+                result["raw_response"],
+                height=400
+            )
 
     else:
 
-        st.session_state["buyers"] = result
+        df = pd.DataFrame(result)
 
-# --------------------------------------------------------
-# Results
-# --------------------------------------------------------
+        st.success(f"{len(df)} buyers found.")
 
-if "buyers" in st.session_state:
-
-    buyers_list = st.session_state["buyers"]
-
-    st.subheader("📊 Dashboard")
-
-    col1, col2, col3 = st.columns(3)
-
-    col1.metric(
-        "Buyers Found",
-        len(buyers_list)
-    )
-
-    col2.metric(
-        "Average Confidence",
-        f"{average_confidence(buyers_list)}%"
-    )
-
-    col3.metric(
-        "Country",
-        country
-    )
-
-    st.divider()
-
-    search = st.text_input(
-        "🔍 Search Buyers"
-    )
-
-    filtered = search_buyers(
-        buyers_list,
-        search
-    )
-
-    st.write(f"Showing **{len(filtered)}** buyers")
-
-    st.divider()
-
-    for buyer in filtered:
-
-        with st.container(border=True):
-
-            st.subheader(
-                buyer["company_name"]
-            )
-
-            st.write(
-                f"🌍 **Country:** {buyer['country']}"
-            )
-
-            st.write(
-                f"🏢 **Buyer Type:** {buyer['buyer_type']}"
-            )
-
-            st.write(
-                f"📦 **Products:** {buyer['products']}"
-            )
-
-            st.write(
-                f"💡 {buyer['reason']}"
-            )
-
-            st.link_button(
-                "🌐 Visit Website",
-                buyer["website"]
-            )
-
-            st.progress(
-                buyer["confidence"] / 100
-            )
-
-            st.caption(
-                f"Confidence Score: {buyer['confidence']}%"
-            )
-
-    st.divider()
-
-    df = buyers_dataframe(filtered)
-
-    col_csv, col_excel = st.columns(2)
-
-    with col_csv:
-
-        st.download_button(
-            "📥 Download CSV",
-            dataframe_to_csv(df),
-            file_name="buyers.csv",
-            mime="text/csv",
+        st.dataframe(
+            df,
             use_container_width=True
         )
 
-    with col_excel:
+        csv = dataframe_to_csv(df)
+        excel = dataframe_to_excel(df)
 
-        st.download_button(
-            "📥 Download Excel",
-            dataframe_to_excel(df),
-            file_name="buyers.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            use_container_width=True
-        )
+        col1, col2 = st.columns(2)
+
+        with col1:
+
+            st.download_button(
+                "📄 Download CSV",
+                csv,
+                file_name="buyers.csv",
+                mime="text/csv",
+                use_container_width=True
+            )
+
+        with col2:
+
+            st.download_button(
+                "📊 Download Excel",
+                excel,
+                file_name="buyers.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
+
+# --------------------------------------------------
+# Footer
+# --------------------------------------------------
+
+st.markdown("---")
+
+st.caption(
+    "Developed by Manish Kumar | Version 2.0"
+)

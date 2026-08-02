@@ -104,3 +104,34 @@ def dataframe_to_excel(df):
         )
 
     return output.getvalue()
+# --------------------------------------------------------
+# JSON Response to DataFrame
+# --------------------------------------------------------
+
+import json
+
+
+def json_to_dataframe(response_text):
+    """
+    Converts Gemini JSON response into a Pandas DataFrame.
+    """
+
+    try:
+
+        # Remove markdown code fences if Gemini returns them
+        cleaned = (
+            response_text
+            .replace("```json", "")
+            .replace("```", "")
+            .strip()
+        )
+
+        buyers = json.loads(cleaned)
+
+        if isinstance(buyers, dict):
+            buyers = [buyers]
+
+        return pd.DataFrame(buyers)
+
+    except Exception as e:
+        raise Exception(f"Unable to parse Gemini JSON:\n{e}")

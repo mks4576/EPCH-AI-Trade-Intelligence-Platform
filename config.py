@@ -1,67 +1,92 @@
 """
 Configuration File
 EPCH AI Trade Intelligence Platform
+Version 2.0
 """
 
-# --------------------------------------------------------
-# Application
-# --------------------------------------------------------
+# --------------------------------------------------
+# Countries
+# --------------------------------------------------
 
-APP_NAME = "Export Promotion Council of India : AI Trade Intelligence Platform"
-
-APP_ICON = "🌍"
-
-PAGE_LAYOUT = "wide"
-
-# --------------------------------------------------------
-# Product Categories
-# --------------------------------------------------------
-
-CATEGORIES = [
-    "Home Decor",
-    "Furniture",
-    "Lighting",
-    "Kitchenware",
-    "Fashion Accessories",
-    "Textiles",
-    "Carpets & Rugs",
-    "Christmas Decorations",
-    "Garden Decor",
-    "Gifts & Crafts",
-]
-
-# --------------------------------------------------------
-# Target Countries
-# --------------------------------------------------------
-
-QUICK_COUNTRIES = [
-    "USA",
-    "Canada",
+COUNTRIES = [
+    "United States",
     "Germany",
-    "France",
     "United Kingdom",
+    "France",
+    "Italy",
+    "Netherlands",
+    "Spain",
+    "Canada",
     "Australia",
     "Japan",
     "UAE",
+    "Saudi Arabia",
+    "Singapore"
 ]
 
-# --------------------------------------------------------
-# Fair Information
-# --------------------------------------------------------
+# --------------------------------------------------
+# Product Categories
+# --------------------------------------------------
 
-FAIR_INFO = {
-    "name": "IHGF Delhi Fair",
-    "organizer": "Export Promotion Council for Handicrafts (EPCH)",
-    "venue": "India Expo Centre & Mart, Greater Noida",
-    "website": "https://ihgfdelhifair.in",
-}
+PRODUCT_CATEGORIES = [
+    "Wooden Handicrafts",
+    "Home Decor",
+    "Furniture",
+    "Metal Handicrafts",
+    "Glassware",
+    "Ceramics",
+    "Textiles",
+    "Handmade Paper",
+    "Jewellery",
+    "Leather Products",
+    "Natural Fiber Products",
+    "Christmas Decorations",
+    "Fashion Accessories",
+    "Gift Articles"
+]
 
-# --------------------------------------------------------
-# Gemini
-# --------------------------------------------------------
+# --------------------------------------------------
+# Buyer Types
+# --------------------------------------------------
 
-MODEL_NAME = "gemini-flash-latest"
+BUYER_TYPES = [
+    "Importers",
+    "Wholesalers",
+    "Retailers",
+    "Distributors",
+    "Buying Houses",
+    "E-commerce Companies"
+]
 
-DEFAULT_BUYERS = 10
+# --------------------------------------------------
+# Number of Buyers
+# --------------------------------------------------
 
-MAX_BUYERS = 25
+BUYER_COUNTS = [
+    5,
+    10,
+    20,
+    30,
+    50
+]
+
+# --------------------------------------------------
+# Export Formats
+# --------------------------------------------------
+
+EXPORT_FORMATS = [
+    "CSV",
+    "Excel"
+]
+
+# --------------------------------------------------
+# AI Model
+# --------------------------------------------------
+
+AI_MODEL = "gemini-flash-latest"
+
+# --------------------------------------------------
+# Platform Version
+# --------------------------------------------------
+
+APP_VERSION = "2.0"

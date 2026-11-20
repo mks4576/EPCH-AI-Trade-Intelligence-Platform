@@ -16,7 +16,7 @@ APP_VERSION = "2.0.0"
 # ==========================================================
 
 # Stable model for Buyer Discovery
-AI_MODEL = "gemini-2.0-flash"
+AI_MODEL = "gemini-3.8-flash"
 
 # ==========================================================
 # Buyer Discovery Options
